@@ -46,6 +46,12 @@ def text_cleansing(text):
     clean_text = str(text).lower()
     # membersihkan URL
     clean_text = re.sub(r'(http\S+|www\S+)', '', clean_text).strip()
+    # membersihkan emoticon byte
+    clean_text = clean_text.replace("\\", " ")
+    clean_text = re.sub('x..', ' ', clean_text)
+    clean_text = re.sub(' n ', ' ', clean_text)
+    clean_text = re.sub('\\+', ' ', clean_text)
+    clean_text = re.sub('  +', ' ', clean_text)
     # bersihkan tanda baca (selain huruf dan angka)
     clean_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', clean_text)
     # membersihkan username
