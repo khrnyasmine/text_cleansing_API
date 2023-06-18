@@ -3,14 +3,18 @@ Flask API Application
 """
 from flask import Flask, jsonify, request
 import pandas as pd
+from time import perf_counter
 from flasgger import Swagger, swag_from, LazyString, LazyJSONEncoder
 from db import (
     create_connection, insert_dictionary_to_db, 
     insert_result_to_db, show_cleansing_result,
-    insert_upload_result_to_db
+    insert_upload_result_to_db, insert_abusive_occurence_to_db
 )
-from cleansing_function import text_cleansing, cleansing_files
- 
+from cleansing_function import (
+    text_cleansing, cleansing_files,
+    count_abusive, abusive_occurence
+)
+
 # Prevent sorting keys in JSON response
 import flask
 flask.json.provider.DefaultJSONProvider.sort_keys = False
@@ -55,7 +59,7 @@ def home():
     welcome_msg = {
         "version": "1.0.0",
         "message": "Welcome to Flask API",
-        "author": "Benedictus Aryo"
+        "author": "Khairina Yasmine"
     }
     return jsonify(welcome_msg)
 
@@ -73,12 +77,21 @@ def show_cleansing_result_api():
 def cleansing_form():
     # Get text from input user
     raw_text = request.form["raw_text"]
+    # Count abusive
+    jumlah_kata_abusive = count_abusive(raw_text)
+    # Abusive word occurence
+    data_kemunculan_kata_abusive = abusive_occurence
     # Cleansing text
+    start = perf_counter()
     clean_text = text_cleansing(raw_text)
-    result_response = {"raw_text": raw_text, "clean_text": clean_text}
+    end = perf_counter()
+    time_elapse = end - start
+    print(f"Processing time: {time_elapse} second")
+    result_response = {"raw_text": raw_text, "clean_text": clean_text, "processing_time": time_elapse}
     # Insert result to database
     db_connection = create_connection()
-    insert_result_to_db(db_connection, raw_text, clean_text)
+    insert_result_to_db(db_connection, raw_text, clean_text, jumlah_kata_abusive)
+    insert_abusive_occurence_to_db(db_connection, data_kemunculan_kata_abusive)
     return jsonify(result_response)
 
 # Cleansing text using csv upload
@@ -87,13 +100,23 @@ def cleansing_form():
 def cleansing_upload():
     # Get file from upload to dataframe
     uploaded_file = request.files['upload_file']
+    # Read csv file upload, jika
+    df_upload = pd.read_csv(uploaded_file, encoding="latin-1")
     # Read csv file to dataframe then cleansing
-    df_cleansing = cleansing_files(uploaded_file)
+    start = perf_counter()
+    df_cleansing = cleansing_files(df_upload)
+    end = perf_counter()
+    time_elapse = end - start
+    print(f"Processing time: {time_elapse} second")
+    # Abusive word occurence
+    data_kemunculan_kata_abusive = abusive_occurence
     # Upload result to database
     db_connection = create_connection()
     insert_upload_result_to_db(db_connection, df_cleansing)
+    insert_abusive_occurence_to_db(db_connection, data_kemunculan_kata_abusive)
     print("Upload result to database success!")
-    result_response = df_cleansing.T.to_dict()
+    print_result = df_cleansing[["raw_text", "clean_text"]]
+    result_response = print_result.T.to_dict()
     return jsonify(result_response)
 
 if __name__ == '__main__':
