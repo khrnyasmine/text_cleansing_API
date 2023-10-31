@@ -12,7 +12,7 @@ Building text cleansing API that can receive text or string input and file text 
 
 ## Data Visualisation and Analysis
 ### Background
-The dataset used for text cleansing and further analysis is publicly available on Kaggle. This dataset contains tweets from Indonesian Twitter with multi-label hate speech and abusive language annotation, also abusive and alay words dictionary for data processing. <be>
+The dataset used for text cleansing and further analysis is publicly available on Kaggle. This dataset contains tweets from Indonesian Twitter with multi-label hate speech and abusive language annotation, also abusive and alay words dictionary for data processing. <br>
 <b>Data Source</b>: [Kaggle](https://www.kaggle.com/datasets/ilhamfp31/indonesian-abusive-and-hate-speech-twitter-text)
 ### Exploratory Question
 1. What are the most common words overall?
