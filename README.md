@@ -10,7 +10,7 @@ Building text cleansing API that can receive text or string input and file text 
 6. Click (ctrl + click) on link that appears, then open "link name<b>/docs/</b>"
 7. Try Cleansing Text API with text or file data
 ### Text Cleansing Result
-<b>File :</b> gold_challenge.db (Open with sqlite3)
+<b>File :</b> gold_challenge.db (open with sqlite3)
 
 ## Data Visualisation and Analysis
 ### Background
