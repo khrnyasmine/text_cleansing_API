@@ -1,18 +1,17 @@
 """
 Flask API Application
 """
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Markup
 import pandas as pd
 from time import perf_counter
 from flasgger import Swagger, swag_from, LazyString, LazyJSONEncoder
 from db import (
     create_connection, insert_dictionary_to_db, 
     insert_result_to_db, show_cleansing_result,
-    insert_upload_result_to_db, insert_abusive_occurence_to_db
+    insert_upload_result_to_db,
 )
 from cleansing_function import (
     text_cleansing, cleansing_files,
-    count_abusive, abusive_occurence
 )
 
 # Prevent sorting keys in JSON response
@@ -26,6 +25,7 @@ db_connection.close()
 
 # Initialize flask application
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 # Assign LazyJSONEncoder to app.json_encoder for swagger UI
 app.json_encoder = LazyJSONEncoder
 # Create swagger config & swagger template
@@ -77,21 +77,19 @@ def show_cleansing_result_api():
 def cleansing_form():
     # Get text from input user
     raw_text = request.form["raw_text"]
-    # Count abusive
-    jumlah_kata_abusive = count_abusive(raw_text)
-    # Abusive word occurence
-    data_kemunculan_kata_abusive = abusive_occurence
-    # Cleansing text
+
+    # Cleaning text data
     start = perf_counter()
     clean_text = text_cleansing(raw_text)
     end = perf_counter()
     time_elapse = end - start
     print(f"Processing time: {time_elapse} second")
+
     result_response = {"raw_text": raw_text, "clean_text": clean_text, "processing_time": time_elapse}
+    
     # Insert result to database
     db_connection = create_connection()
-    insert_result_to_db(db_connection, raw_text, clean_text, jumlah_kata_abusive)
-    insert_abusive_occurence_to_db(db_connection, data_kemunculan_kata_abusive)
+    insert_result_to_db(db_connection, raw_text, clean_text)
     return jsonify(result_response)
 
 # Cleansing text using csv upload
@@ -108,12 +106,9 @@ def cleansing_upload():
     end = perf_counter()
     time_elapse = end - start
     print(f"Processing time: {time_elapse} second")
-    # Abusive word occurence
-    data_kemunculan_kata_abusive = abusive_occurence
     # Upload result to database
     db_connection = create_connection()
     insert_upload_result_to_db(db_connection, df_cleansing)
-    insert_abusive_occurence_to_db(db_connection, data_kemunculan_kata_abusive)
     print("Upload result to database success!")
     print_result = df_cleansing[["raw_text", "clean_text"]]
     result_response = print_result.T.to_dict()

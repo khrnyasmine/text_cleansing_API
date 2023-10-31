@@ -32,10 +32,10 @@ def insert_dictionary_to_db(conn):
     df_alay.to_sql('alay', conn, if_exists='replace', index=False)
     print("Inserting dataframe to database success!")
 
-def insert_result_to_db(conn, raw_text, clean_text, jumlah_kata_abusive):
+def insert_result_to_db(conn, raw_text, clean_text):
     # Insert result to database
     print("Inserting result to database...")
-    df = pd.DataFrame({'raw_text': [raw_text], 'clean_text': [clean_text], 'jumlah_kata_abusive': [jumlah_kata_abusive]})
+    df = pd.DataFrame({'raw_text': [raw_text], 'clean_text': [clean_text]})
     df.to_sql('cleansing_result', conn, if_exists='append', index=False)
     print("Inserting result to database success!")
 
@@ -44,13 +44,6 @@ def insert_upload_result_to_db(conn, clean_df):
     print("Inserting result to database...")
     clean_df.to_sql('cleansing_result', conn, if_exists='append', index=False)
     print("Inserting result to database success!")
-
-def insert_abusive_occurence_to_db(conn, abusive_occurence):
-    # Insert result to database
-    print("Inserting abusive occurence data to database...")
-    df = pd.DataFrame({'abusive_occurence': abusive_occurence})
-    df.to_sql('abusive_occurence', conn, if_exists='append', index=False)
-    print("Inserting abusive occurence data to database success!")
 
 def show_cleansing_result(conn):
     # Show cleansing result
